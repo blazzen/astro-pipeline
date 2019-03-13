@@ -4,7 +4,6 @@ import nom.tam.fits._
 import nom.tam.util.BufferedFile
 import org.apache.log4j.Logger
 import pipeline.ReferenceAstroObject
-import pipeline.utils.CommonUtils.PipelineConfigurationException
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source
@@ -25,7 +24,7 @@ object FitsLdacBuilder {
     FitsColumnSpecification("OBSDATE", "1D", "yr", "F13.8")
   )
 
-  def buildPrimaryHDU: BasicHDU = {
+  private def buildPrimaryHDU: BasicHDU = {
     val primaryHDU = FitsFactory.HDUFactory(Array[Double]())
     primaryHDU.getHeader.addValue("BITPIX", 8, "array data type")
     primaryHDU.getHeader.addValue("NAXIS", 0, "number of array dimensions")
@@ -34,7 +33,7 @@ object FitsLdacBuilder {
     primaryHDU
   }
 
-  def buildLdacImheadHDU: BasicHDU = {
+  private def buildLdacImheadHDU: BasicHDU = {
     val fakeTable = Array.ofDim[String](1, 1)
     fakeTable(0)(0) = "I need to write something to this binary table becauseof strange FITS LDAC pseudo-standard."
 
@@ -55,7 +54,7 @@ object FitsLdacBuilder {
     FitsFactory.HDUFactory(fakeHeader, BinaryTableHDU.encapsulate(fakeTable))
   }
 
-  def buildLdacObjectsHDU(referenceObjects: Array[ReferenceAstroObject]): BasicHDU = {
+  private def buildLdacObjectsHDU(referenceObjects: Array[ReferenceAstroObject]): BasicHDU = {
     val transposed = referenceObjects.map(_.toArray).transpose
     val table = new BinaryTable()
     FitsColumnsSpecifications.zipWithIndex.foreach(indexedSpec => {
@@ -84,6 +83,14 @@ object FitsLdacBuilder {
     FitsFactory.HDUFactory(header, table)
   }
 
+  private def write(objects: Array[ReferenceAstroObject], destination: String): Unit = {
+    val fitsLdac: Fits = new Fits()
+    fitsLdac.addHDU(buildPrimaryHDU)
+    fitsLdac.addHDU(buildLdacImheadHDU)
+    fitsLdac.addHDU(buildLdacObjectsHDU(objects))
+    fitsLdac.write(new BufferedFile(destination, "rw"))
+  }
+
   def fromCsv(filename: String, destination: String): Unit = {
     val bufferedSource = Source.fromFile(filename)
     val rows = ArrayBuffer[ReferenceAstroObject]()
@@ -92,17 +99,15 @@ object FitsLdacBuilder {
       try {
         rows += ReferenceAstroObject(line)
       } catch {
-        case e: PipelineConfigurationException => throw e
         case e: Exception => log.error(s"Can't parse csv line: $line", e)
       }
     }
 
     bufferedSource.close
 
-    val fitsLdac: Fits = new Fits()
-    fitsLdac.addHDU(buildPrimaryHDU)
-    fitsLdac.addHDU(buildLdacImheadHDU)
-    fitsLdac.addHDU(buildLdacObjectsHDU(rows.toArray))
-    fitsLdac.write(new BufferedFile(destination, "rw"))
+    write(rows.toArray, destination)
   }
+
+  def fromArray(data: Array[Array[Double]], destination: String): Unit =
+    write(data.map(params => ReferenceAstroObject(params)), destination)
 }

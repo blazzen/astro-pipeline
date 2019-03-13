@@ -1,56 +1,45 @@
 package pipeline
 
-import pipeline.utils.CommonUtils.PipelineConfigurationException
-
 object ReferenceAstroObject {
-  private val ReferenceCatalogName = "GAIA-DR2"
 
   private val Deg = math.Pi / 180.0
   private val Arcsec = Deg / 3600.0
   private val Mas = Arcsec / 1000.0
 
-  //TODO: the order is different now, the mapping should be changed
-  private val GaiaDr2Indices = Map(
-    "ra" -> 5,
-    "dec" -> 7,
-    "ra_error" -> 6,
-    "dec_error" -> 8,
-    "ref_epoch" -> 4,
-    "phot_g_mean_flux" -> 47,
-    "phot_g_mean_flux_error" -> 48,
-    "phot_g_mean_mag" -> 50
-  )
+  object GaiaDr2 {
+    val Ra = "ra"
+    val Dec = "dec"
+    val RaError = "ra_error"
+    val DecError = "dec_error"
+    val RefEpoch = "ref_epoch"
+    val PhotGMeanFlux = "phot_g_mean_flux"
+    val PhotGMeanFluxError = "phot_g_mean_flux_error"
+    val PhotGMeanMag = "phot_g_mean_mag"
 
-  def fromGaiaDr2(line: String): ReferenceAstroObject = {
-    val columns = line.split(",", -1).map(_.trim)
-    val filteredColumns = GaiaDr2Indices.map(entry => (entry._1, columns(entry._2).toDouble))
+    val Columns: Seq[String] = Seq(Ra, Dec, RaError, DecError, RefEpoch, PhotGMeanFlux, PhotGMeanFluxError, PhotGMeanMag)
+  }
 
-    val flux = filteredColumns("phot_g_mean_flux")
-    val fluxerr = filteredColumns("phot_g_mean_flux_error")
-    var mag = filteredColumns("phot_g_mean_mag")
-    var magerr = 1.0857 * fluxerr / flux
-    if (flux <= 0.0) {
+  def fromGaiaDr2(ra: Double, dec: Double, raError: Double, decError: Double, refEpoch: Double,
+                  photGMeanFlux: Double, photGMeanFluxError: Double, photGMeanMag: Double): ReferenceAstroObject = {
+    var mag = photGMeanMag
+    var magError = 1.0857 * photGMeanFluxError / photGMeanFlux
+    if (photGMeanFlux <= 0.0) {
       mag = 99.0
-      magerr = 99.0
+      magError = 99.0
     }
 
-    ReferenceAstroObject(
-      filteredColumns("ra"),
-      filteredColumns("dec"),
-      filteredColumns("ra_error") * Mas / Deg,
-      filteredColumns("dec_error") * Mas / Deg,
-      mag,
-      magerr,
-      filteredColumns("ref_epoch")
-    )
+    ReferenceAstroObject(ra, dec, raError * Mas / Deg, decError * Mas / Deg, mag, magError, refEpoch)
   }
 
   def apply(line: String): ReferenceAstroObject = {
-    ReferenceCatalogName match {
-      case "GAIA-DR2" => fromGaiaDr2(line)
-      case _ => throw new PipelineConfigurationException("Unknown reference catalog!")
-    }
+    val columns = line.split(",", -1).map(_.trim)
+    val arr = columns.map(_.toDouble)
+
+    apply(arr)
   }
+
+  def apply(arr: Array[Double]): ReferenceAstroObject =
+    fromGaiaDr2(arr(0), arr(1), arr(2), arr(3), arr(4), arr(5), arr(6), arr(7))
 }
 
 case class ReferenceAstroObject(ra: Double, dec: Double, errA: Double, errB: Double, mag: Double, magErr: Double, epoch: Double) {

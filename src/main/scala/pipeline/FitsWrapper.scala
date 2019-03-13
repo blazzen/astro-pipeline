@@ -19,7 +19,7 @@ class FitsWrapper(var filename: String) {
   private var wcsCreated: Boolean = false
   private var wcsInitError: Boolean = false
 
-  var wcsRadius: Double = 0.0
+  var wcsRadius: Double = -1.0
 
   try {
     image = new Fits(filename)
@@ -84,13 +84,19 @@ class FitsWrapper(var filename: String) {
     basicHDU.getAxes()(i)
   }
 
-  def calculateRadius(): Unit = {
-    val center_pix_coord1 = (axisLen(1) + 1).toDouble / 2
-    val center_pix_coord2 = (axisLen(0) + 1).toDouble / 2
-    val center_wcs_coords = wcs.pix2wcs(center_pix_coord1, center_pix_coord2)
-    val corner_wcs_coords = wcs.pix2wcs(0, 0)
+  def radius: Double = {
+    if (wcsRadius == -1.0) {
+      wcsRadius = calculateRadius
+    }
+    wcsRadius
+  }
 
-    wcsRadius = AstroUtils.wcsDistance(center_wcs_coords, corner_wcs_coords)
-    log.warn(s"RADIUS: $wcsRadius")
+  def calculateRadius: Double = {
+    val firstCenterPixCoord = (axisLen(1) + 1).toDouble / 2
+    val secondCenterPixCoord = (axisLen(0) + 1).toDouble / 2
+    val centerWcsCoords = wcs.pix2wcs(firstCenterPixCoord, secondCenterPixCoord)
+    val cornerWcsCoords = wcs.pix2wcs(0, 0)
+
+    AstroUtils.wcsDistance(centerWcsCoords, cornerWcsCoords)
   }
 }
