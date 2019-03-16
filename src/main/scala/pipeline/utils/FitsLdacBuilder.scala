@@ -110,4 +110,7 @@ object FitsLdacBuilder {
 
   def fromArray(data: Array[Array[Double]], destination: String): Unit =
     write(data.map(params => ReferenceAstroObject(params)), destination)
+
+  def fromSeq(data: Seq[Seq[Double]], destination: String): Unit =
+    write(data.toArray.map(params => ReferenceAstroObject(params)), destination)
 }

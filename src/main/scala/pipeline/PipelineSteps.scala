@@ -23,7 +23,7 @@ object PipelineSteps {
   private val CalibratedHeadName = "extracted.head"
   private val CalibrationLogName = "calibration_log.txt"
 
-  def run(path: String, objects: Array[Array[Double]]): Unit = {
+  def run(path: String, objects: Seq[Seq[Double]]): Unit = {
     val filename = path.split("/").last
     val destinationDir = filename.split(DataSuffix)(0)
     val destinationPath = s"$HomePath/$LocalOutputPath/$destinationDir"
@@ -36,7 +36,7 @@ object PipelineSteps {
     }
 
     val localRefCatalogPath = s"$destinationPath/astrefcat.cat"
-    FitsLdacBuilder.fromArray(objects, localRefCatalogPath)
+    FitsLdacBuilder.fromSeq(objects, localRefCatalogPath)
 
     if (!Files.exists(Paths.get(localRefCatalogPath))) {
       extract(localImagePath, destinationPath)

@@ -40,6 +40,9 @@ object ReferenceAstroObject {
 
   def apply(arr: Array[Double]): ReferenceAstroObject =
     fromGaiaDr2(arr(0), arr(1), arr(2), arr(3), arr(4), arr(5), arr(6), arr(7))
+
+  def apply(seq: Seq[Double]): ReferenceAstroObject =
+    fromGaiaDr2(seq(0), seq(1), seq(2), seq(3), seq(4), seq(5), seq(6), seq(7))
 }
 
 case class ReferenceAstroObject(ra: Double, dec: Double, errA: Double, errB: Double, mag: Double, magErr: Double, epoch: Double) {
