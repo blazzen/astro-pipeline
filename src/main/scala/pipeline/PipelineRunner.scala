@@ -58,7 +58,7 @@ object PipelineRunner extends App {
     .select(GaiaDr2.Ra, GaiaDr2.Dec, GaiaDr2.RaError, GaiaDr2.DecError, GaiaDr2.RefEpoch, GaiaDr2.PhotGMeanFlux,
       GaiaDr2.PhotGMeanFluxError, GaiaDr2.PhotGMeanFluxError)
 
-  val images = sc.parallelize(fs.listStatus(new Path(DataPath)))
+  sc.parallelize(fs.listStatus(new Path(DataPath)))
     .map(status => status.getPath.toString)
     .filter(path => path.endsWith(DataSuffix))
     .map(path => {
