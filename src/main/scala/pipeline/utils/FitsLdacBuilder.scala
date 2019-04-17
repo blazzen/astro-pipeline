@@ -85,6 +85,11 @@ object FitsLdacBuilder {
 
   private def write(objects: Array[ReferenceAstroObject], destination: String): Unit = {
     val fitsLdac: Fits = new Fits()
+    if (fitsLdac == null) {
+      log.error("Can't create Fits object from nom-tam-fits library!")
+    } else {
+      log.info("Created Fits object from nom-tam-fits library")
+    }
     fitsLdac.addHDU(buildPrimaryHDU)
     fitsLdac.addHDU(buildLdacImheadHDU)
     fitsLdac.addHDU(buildLdacObjectsHDU(objects))
@@ -107,6 +112,9 @@ object FitsLdacBuilder {
 
     write(rows.toArray, destination)
   }
+
+  def fromObjectsArray(data: Array[ReferenceAstroObject], destination: String): Unit =
+    write(data, destination)
 
   def fromArray(data: Array[Array[Double]], destination: String): Unit =
     write(data.map(params => ReferenceAstroObject(params)), destination)

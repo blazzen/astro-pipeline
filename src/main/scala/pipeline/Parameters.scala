@@ -15,4 +15,6 @@ object Parameters {
   val LocalOutputPath = "output"
 
   val DataSuffix = ".fits"
+
+  val PositionErrorArcmin = 1.0
 }

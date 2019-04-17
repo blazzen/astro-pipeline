@@ -1,9 +1,11 @@
 package pipeline
 
+import org.apache.spark.sql.Row
+import pipeline.utils.AstroUtils
+
 object ReferenceAstroObject {
 
-  private val Deg = math.Pi / 180.0
-  private val Arcsec = Deg / 3600.0
+  private val Arcsec = AstroUtils.Deg / 3600.0
   private val Mas = Arcsec / 1000.0
 
   object GaiaDr2 {
@@ -28,7 +30,7 @@ object ReferenceAstroObject {
       magError = 99.0
     }
 
-    ReferenceAstroObject(ra, dec, raError * Mas / Deg, decError * Mas / Deg, mag, magError, refEpoch)
+    ReferenceAstroObject(ra, dec, raError * Mas / AstroUtils.Deg, decError * Mas / AstroUtils.Deg, mag, magError, refEpoch)
   }
 
   def apply(line: String): ReferenceAstroObject = {
@@ -43,6 +45,9 @@ object ReferenceAstroObject {
 
   def apply(seq: Seq[Double]): ReferenceAstroObject =
     fromGaiaDr2(seq(0), seq(1), seq(2), seq(3), seq(4), seq(5), seq(6), seq(7))
+
+  def apply(row: Row): ReferenceAstroObject =
+    ReferenceAstroObject(GaiaDr2.Columns.map(column => row.getAs[Double](column)))
 }
 
 case class ReferenceAstroObject(ra: Double, dec: Double, errA: Double, errB: Double, mag: Double, magErr: Double, epoch: Double) {

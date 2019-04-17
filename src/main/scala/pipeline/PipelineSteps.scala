@@ -24,10 +24,25 @@ object PipelineSteps {
   private val CalibrationLogName = "calibration_log.txt"
 
   def run(path: String, objects: Seq[Seq[Double]]): Unit = {
+    run(path, objects.toArray.map(ReferenceAstroObject(_)))
+  }
+
+  def run(path: String, objects: Array[ReferenceAstroObject]): Unit = {
+    if (objects != null) {
+      log.info(s"Got  ${objects.length} reference rows")
+    } else {
+      throw new RuntimeException("The objects param is null!")
+    }
+
     val filename = path.split("/").last
     val destinationDir = filename.split(DataSuffix)(0)
     val destinationPath = s"$HomePath/$LocalOutputPath/$destinationDir"
     val localImagePath = s"$HomePath/$LocalInputPath/$filename"
+
+    val success: Boolean = CommonUtils.createDir(destinationPath)
+    if (!success) {
+      throw new RuntimeException(s"$destinationPath wasn't created!")
+    }
 
     val conf = new Configuration()
     val fs = FileSystem.get(new URI(ClusterUri), conf)
@@ -36,9 +51,9 @@ object PipelineSteps {
     }
 
     val localRefCatalogPath = s"$destinationPath/astrefcat.cat"
-    FitsLdacBuilder.fromSeq(objects, localRefCatalogPath)
+    FitsLdacBuilder.fromObjectsArray(objects, localRefCatalogPath)
 
-    if (!Files.exists(Paths.get(localRefCatalogPath))) {
+    if (Files.exists(Paths.get(localRefCatalogPath))) {
       extract(localImagePath, destinationPath)
       if (Files.exists(Paths.get(s"$destinationPath/$ExtractedCatalogName"))) {
         calibrate(localImagePath, localRefCatalogPath, destinationPath)
@@ -60,8 +75,6 @@ object PipelineSteps {
   def extract(imagePath: String, destinationPath: String): Unit = {
     val catalogPath = s"$destinationPath/$ExtractedCatalogName"
     val logPath = s"$destinationPath/$ExtractionLogName"
-
-    CommonUtils.createDir(destinationPath)
 
     log.info(s"Extracting image: $imagePath")
 
