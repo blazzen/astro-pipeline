@@ -19,4 +19,5 @@ libraryDependencies ++= Seq(
 
 libraryDependencies += "gov.nasa.gsfc.heasarc" % "nom-tam-fits" % "1.12.0"
 libraryDependencies += "io.github.malapert" % "JWcs" % "1.2.0" from "file://" + baseDirectory.value + "/lib/JWcs-1.2.0/target/JWcs-1.2.0.jar"
+libraryDependencies += "healpix.essentials" % "healpix" % "1.0" from "file://" + baseDirectory.value + "/lib/Healpix_3.50/src/java/dist/jhealpix.jar"
 libraryDependencies += "org.apache.commons" % "commons-io" % "1.3.2"

@@ -1,5 +1,7 @@
 package pipeline.utils
 
+import healpix.essentials.{HealpixProc, Pointing}
+
 object AstroUtils {
 
   val PiDeg: Double = 180.0
@@ -25,4 +27,15 @@ object AstroUtils {
       PiDeg
     }
   }
+
+  def getHealpixId(ra: Double, dec: Double): Long = {
+    val pointing = new Pointing(math.toRadians(90 - dec), math.toRadians(360 - ra))
+    HealpixProc.ang2pixNest(12, pointing)
+  }
+
+  def getAreaHealpixIds(ra: Double, dec: Double, radius: Double): Array[Long] = {
+    val pointing = new Pointing(math.toRadians(90 - dec), math.toRadians(360 - ra))
+    HealpixProc.queryDiscInclusiveNest(12, pointing, radius, 4).toArray
+  }
+
 }

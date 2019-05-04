@@ -39,8 +39,8 @@ object PipelineSteps {
     val destinationPath = s"$HomePath/$LocalOutputPath/$destinationDir"
     val localImagePath = s"$HomePath/$LocalInputPath/$filename"
 
-    val success: Boolean = CommonUtils.createDir(destinationPath)
-    if (!success) {
+    CommonUtils.createDir(destinationPath)
+    if (!Files.exists(Paths.get(destinationPath))) {
       throw new RuntimeException(s"$destinationPath wasn't created!")
     }
 
@@ -51,7 +51,9 @@ object PipelineSteps {
     }
 
     val localRefCatalogPath = s"$destinationPath/astrefcat.cat"
-    FitsLdacBuilder.fromObjectsArray(objects, localRefCatalogPath)
+    if (objects.length != 0) {
+      FitsLdacBuilder.fromObjectsArray(objects, localRefCatalogPath)
+    }
 
     if (Files.exists(Paths.get(localRefCatalogPath))) {
       extract(localImagePath, destinationPath)

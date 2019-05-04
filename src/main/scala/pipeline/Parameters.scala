@@ -9,12 +9,13 @@ object Parameters {
 
   val DataPath = "wasb:///pipeline/input"
   val OutputPath = "wasb:///pipeline/output"
-  val ReferenceCatalogPath = "wasb:///gaia/catalog60.parquet"
+  val ReferenceCatalogPath = "wasb:///gaia/gaia_table"
+  val BoundsDfPath = "wasb:///gaia/bounds.parquet"
   val HomePath = "/home/sshuser"
   val LocalInputPath = "input"
   val LocalOutputPath = "output"
 
   val DataSuffix = ".fits"
 
-  val PositionErrorArcmin = 1.0
+  val PositionErrorDeg: Double = 1.0 / 60.0
 }
