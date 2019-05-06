@@ -90,9 +90,9 @@ object PipelineRunner {
 
     val pids = areasHids.join(boundsDf, $"hid" >= $"first" && $"hid" <= $"last")
       .select($"pid")
+      .distinct
       .as[Int]
       .collect
-      .distinct
 
     println(s"partitions: ${pids.mkString(", ")}")
     println(s"count: ${pids.length}")
