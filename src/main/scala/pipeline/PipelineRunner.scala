@@ -84,17 +84,20 @@ object PipelineRunner {
 
     val boundsDf = spark.read.parquet(BoundsDfPath)
 
-    val areasHids = imagesDf.withColumn("hids", getAreaHealpixIdsUdf($"centerRa", $"centerDec", $"radius"))
-      .select(explode($"hids").alias("hid"))
+    val imagesWithPids = imagesDf.withColumn("hids", getAreaHealpixIdsUdf($"centerRa", $"centerDec", $"radius"))
+      .select(explode($"hids").alias("hid"), $"path", $"centerRa", $"centerDec", $"radius")
+      .join(broadcast(boundsDf), $"hid" >= $"first" && $"hid" <= $"last")
+      .select("path", "centerRa", "centerDec", "radius", "pid")
       .distinct
 
-    val pids = areasHids.join(boundsDf, $"hid" >= $"first" && $"hid" <= $"last")
-      .select($"pid")
+    imagesWithPids.persist()
+
+    val pids = imagesWithPids.select($"pid")
       .distinct
       .as[Int]
       .collect
 
-    println(s"partitions: ${pids.mkString(", ")}")
+    println(s"partitions: ${pids.sorted.mkString(", ")}")
     println(s"count: ${pids.length}")
 
     val referenceDf = spark.read.parquet(ReferenceCatalogPath)
@@ -102,8 +105,10 @@ object PipelineRunner {
         GaiaDr2.PhotGMeanFluxError, GaiaDr2.PhotGMeanMag)
 
     referenceDf.filter($"pid".isin(pids: _*))
-      .join(broadcast(imagesDf), wcsDistanceUdf($"centerRa", $"centerDec", $"ra", $"dec") < $"radius")
-      .groupBy("path")
+      .join(
+        broadcast(imagesWithPids),
+        imagesWithPids("pid") === referenceDf("pid") && wcsDistanceUdf($"centerRa", $"centerDec", $"ra", $"dec") < $"radius"
+      ).groupBy("path")
       .agg(twoDimSeqAggregator)
       .foreach(row => PipelineSteps.run(row.getString(0), row.getSeq[Seq[Double]](1)))
 

@@ -9,8 +9,8 @@ object Parameters {
 
   val DataPath = "wasb:///pipeline/input"
   val OutputPath = "wasb:///pipeline/output"
-  val ReferenceCatalogPath = "wasb:///gaia/gaia_table"
-  val BoundsDfPath = "wasb:///gaia/bounds.parquet"
+  val ReferenceCatalogPath = "wasb:///gaia/gaia_table_1024x10"
+  val BoundsDfPath = "wasb:///gaia/bounds_1024x10.parquet"
   val HomePath = "/home/sshuser"
   val LocalInputPath = "input"
   val LocalOutputPath = "output"

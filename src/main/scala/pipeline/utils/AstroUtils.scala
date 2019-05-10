@@ -30,12 +30,12 @@ object AstroUtils {
 
   def getHealpixId(ra: Double, dec: Double): Long = {
     val pointing = new Pointing(math.toRadians(90 - dec), math.toRadians(360 - ra))
-    HealpixProc.ang2pixNest(12, pointing)
+    HealpixProc.ang2pixNest(10, pointing)
   }
 
   def getAreaHealpixIds(ra: Double, dec: Double, radius: Double): Array[Long] = {
     val pointing = new Pointing(math.toRadians(90 - dec), math.toRadians(360 - ra))
-    HealpixProc.queryDiscInclusiveNest(12, pointing, radius, 4).toArray
+    HealpixProc.queryDiscInclusiveNest(10, pointing, math.toRadians(radius), 4).toArray
   }
 
 }
