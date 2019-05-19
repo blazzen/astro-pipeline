@@ -1,4 +1,4 @@
-package pipeline
+package pipeline.entities
 
 import scala.io.Source
 

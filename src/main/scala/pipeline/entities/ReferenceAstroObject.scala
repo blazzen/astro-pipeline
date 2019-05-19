@@ -1,4 +1,4 @@
-package pipeline
+package pipeline.entities
 
 import org.apache.spark.sql.Row
 import pipeline.utils.AstroUtils

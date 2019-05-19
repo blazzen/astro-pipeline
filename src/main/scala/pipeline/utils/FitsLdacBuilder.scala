@@ -3,7 +3,7 @@ package pipeline.utils
 import nom.tam.fits._
 import nom.tam.util.BufferedFile
 import org.apache.log4j.Logger
-import pipeline.ReferenceAstroObject
+import pipeline.entities.ReferenceAstroObject
 
 import scala.collection.mutable.ArrayBuffer
 import scala.io.Source

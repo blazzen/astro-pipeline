@@ -1,7 +1,7 @@
-package pipeline
+package pipeline.entities
 
 import io.github.malapert.jwcs.JWcsFits
-import nom.tam.fits.{BasicHDU, Fits, Header}
+import nom.tam.fits._
 import org.apache.log4j.Logger
 import pipeline.utils.AstroUtils
 
@@ -72,6 +72,13 @@ class FitsWrapper(var filename: String) {
   def crval(i: Int): Double = {
     require(i == 1 || i == 2, "invalid index")
     header.getDoubleValue(s"CRVAL$i")
+  }
+
+  def centerWcsCoords: (Double, Double) = {
+    val firstCenterPixCoord = (axisLen(1) + 1).toDouble / 2
+    val secondCenterPixCoord = (axisLen(0) + 1).toDouble / 2
+    val centerWcsCoords = wcs.pix2wcs(firstCenterPixCoord, secondCenterPixCoord)
+    (centerWcsCoords(0), centerWcsCoords(1))
   }
 
   def crpix(i: Int): Double = {
